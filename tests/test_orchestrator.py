@@ -13,9 +13,10 @@ from app.core.orchestrator import Orchestrator
 @pytest.fixture
 def mock_orchestrator(mocker):
     """Create a mock orchestrator with mocked dependencies."""
-    with patch("app.core.orchestrator.FinnhubClient") as mock_finnhub, patch(
-        "app.core.orchestrator.OpenAIClient"
-    ) as mock_openai:
+    with (
+        patch("app.core.orchestrator.FinnhubClient") as mock_finnhub,
+        patch("app.core.orchestrator.OpenAIClient") as mock_openai,
+    ):
         mock_finnhub_instance = mocker.Mock()
         mock_openai_instance = mocker.Mock()
         mock_finnhub.return_value = mock_finnhub_instance
@@ -98,9 +99,7 @@ def test_process_query_quote(mock_orchestrator):
         open_price=180.10,
         previous_close=180.10,
     )
-    profile = CompanyProfile(
-        symbol="AAPL", name="Apple Inc", country="US", exchange="NASDAQ"
-    )
+    profile = CompanyProfile(symbol="AAPL", name="Apple Inc", country="US", exchange="NASDAQ")
 
     mock_finnhub.get_quote.return_value = quote
     mock_finnhub.get_company_profile.return_value = profile

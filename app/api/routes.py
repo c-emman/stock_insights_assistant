@@ -32,15 +32,11 @@ async def process_query(request: Request, query: QueryRequest):
     """
     # Validate query
     if not query.query or not query.query.strip():
-        raise HTTPException(
-            status_code=400,
-            detail="Query cannot be empty"
-        )
+        raise HTTPException(status_code=400, detail="Query cannot be empty")
 
     if len(query.query) > MAX_QUERY_LENGTH:
         raise HTTPException(
-            status_code=400,
-            detail=f"Query too long. Maximum {MAX_QUERY_LENGTH} characters."
+            status_code=400, detail=f"Query too long. Maximum {MAX_QUERY_LENGTH} characters."
         )
 
     orchestrator = request.app.state.orchestrator
@@ -51,20 +47,16 @@ async def process_query(request: Request, query: QueryRequest):
 
     except RateLimitError:
         raise HTTPException(
-            status_code=429,
-            detail="Rate limit exceeded. Please wait a moment and try again."
+            status_code=429, detail="Rate limit exceeded. Please wait a moment and try again."
         ) from None
 
     except ValidationError:
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid query format"
-        ) from None
+        raise HTTPException(status_code=400, detail="Invalid query format") from None
 
     except Exception as e:
         # Log the error for debugging
         print(f"Error processing query: {e}")
         raise HTTPException(
             status_code=500,
-            detail="An error occurred while processing your query. Please try again."
+            detail="An error occurred while processing your query. Please try again.",
         ) from None

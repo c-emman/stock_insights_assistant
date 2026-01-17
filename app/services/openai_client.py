@@ -119,9 +119,7 @@ class OpenAIClient:
         else:
             return self._format_unsupported_response()
 
-    def _format_movers_response(
-        self, movers: list, industry: str | None, intent: str
-    ) -> str:
+    def _format_movers_response(self, movers: list, industry: str | None, intent: str) -> str:
         """Format top gainers/losers response."""
         direction = "gainers" if intent == "top_gainers" else "losers"
         industry_text = f" in {industry.title()}" if industry else ""
@@ -169,10 +167,10 @@ class OpenAIClient:
     def _format_compare_response(self, data: dict) -> str:
         """Format comparison response."""
         symbols = list(data.keys())
-        
+
         if len(symbols) < 2:
             return "Unable to fetch comparison data for the requested stocks."
-        
+
         prompt = f"""Format this stock comparison as a brief response (3-4 lines max):
 
             {json.dumps(data, indent=2)}
@@ -200,15 +198,13 @@ class OpenAIClient:
         """Format response for unsupported queries."""
         return (
             "I'm a stock insights assistant and can only help with:\n\n"
-            "• **Top gainers/losers** - e.g., \"What are the top gainers in tech?\"\n"
-            "• **Stock quotes** - e.g., \"How is AAPL doing?\" or \"Get me the TSLA quote\"\n"
-            "• **Stock comparisons** - e.g., \"Compare MSFT and GOOGL\"\n\n"
+            '• **Top gainers/losers** - e.g., "What are the top gainers in tech?"\n'
+            '• **Stock quotes** - e.g., "How is AAPL doing?" or "Get me the TSLA quote"\n'
+            '• **Stock comparisons** - e.g., "Compare MSFT and GOOGL"\n\n'
             "Please try one of these queries!"
         )
 
-    def _fallback_format_movers(
-        self, movers: list, industry: str | None, direction: str
-    ) -> str:
+    def _fallback_format_movers(self, movers: list, industry: str | None, direction: str) -> str:
         """Fallback formatting for movers if AI fails."""
         industry_text = f" in {industry}" if industry else ""
         lines = [f"Top {direction}{industry_text}:"]

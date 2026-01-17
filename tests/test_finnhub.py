@@ -158,9 +158,33 @@ def test_get_top_movers_by_industry_gainers(mock_finnhub_client):
     # Mock quotes for tech stocks
     def mock_quote(symbol):
         quotes = {
-            "AAPL": {"c": 182.52, "d": 5.0, "dp": 2.8, "h": 183.0, "l": 180.0, "o": 180.0, "pc": 177.52},
-            "MSFT": {"c": 380.0, "d": 3.0, "dp": 0.8, "h": 381.0, "l": 378.0, "o": 378.0, "pc": 377.0},
-            "GOOGL": {"c": 140.0, "d": 4.0, "dp": 2.9, "h": 141.0, "l": 139.0, "o": 139.0, "pc": 136.0},
+            "AAPL": {
+                "c": 182.52,
+                "d": 5.0,
+                "dp": 2.8,
+                "h": 183.0,
+                "l": 180.0,
+                "o": 180.0,
+                "pc": 177.52,
+            },
+            "MSFT": {
+                "c": 380.0,
+                "d": 3.0,
+                "dp": 0.8,
+                "h": 381.0,
+                "l": 378.0,
+                "o": 378.0,
+                "pc": 377.0,
+            },
+            "GOOGL": {
+                "c": 140.0,
+                "d": 4.0,
+                "dp": 2.9,
+                "h": 141.0,
+                "l": 139.0,
+                "o": 139.0,
+                "pc": 136.0,
+            },
         }
         return quotes.get(symbol, {})
 
@@ -179,8 +203,24 @@ def test_get_top_movers_by_industry_losers(mock_finnhub_client):
 
     def mock_quote(symbol):
         quotes = {
-            "AAPL": {"c": 175.0, "d": -2.0, "dp": -1.1, "h": 177.0, "l": 174.0, "o": 177.0, "pc": 177.0},
-            "MSFT": {"c": 375.0, "d": -5.0, "dp": -1.3, "h": 380.0, "l": 374.0, "o": 380.0, "pc": 380.0},
+            "AAPL": {
+                "c": 175.0,
+                "d": -2.0,
+                "dp": -1.1,
+                "h": 177.0,
+                "l": 174.0,
+                "o": 177.0,
+                "pc": 177.0,
+            },
+            "MSFT": {
+                "c": 375.0,
+                "d": -5.0,
+                "dp": -1.3,
+                "h": 380.0,
+                "l": 374.0,
+                "o": 380.0,
+                "pc": 380.0,
+            },
         }
         return quotes.get(symbol, {})
 

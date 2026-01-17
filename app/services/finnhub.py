@@ -11,23 +11,79 @@ from app.core.models import CompanyProfile, StockQuote
 # Curated industry symbol lists
 INDUSTRY_SYMBOLS = {
     "technology": [
-        "AAPL", "MSFT", "GOOGL", "GOOG", "AMZN", "META", "NVDA", "TSLA",
-        "NFLX", "CRM", "ORCL", "ADBE", "INTC", "AMD", "CSCO", "IBM",
-        "NOW", "SNOW", "PLTR", "ZM", "UBER", "LYFT",
+        "AAPL",
+        "MSFT",
+        "GOOGL",
+        "GOOG",
+        "AMZN",
+        "META",
+        "NVDA",
+        "TSLA",
+        "NFLX",
+        "CRM",
+        "ORCL",
+        "ADBE",
+        "INTC",
+        "AMD",
+        "CSCO",
+        "IBM",
+        "NOW",
+        "SNOW",
+        "PLTR",
+        "ZM",
+        "UBER",
+        "LYFT",
     ],
     "finance": [
-        "JPM", "BAC", "WFC", "C", "GS", "MS", "BLK", "SCHW",
-        "AXP", "COF", "PYPL", "SQ", "V", "MA",
+        "JPM",
+        "BAC",
+        "WFC",
+        "C",
+        "GS",
+        "MS",
+        "BLK",
+        "SCHW",
+        "AXP",
+        "COF",
+        "PYPL",
+        "SQ",
+        "V",
+        "MA",
     ],
     "healthcare": [
-        "JNJ", "UNH", "PFE", "ABT", "TMO", "ABBV", "LLY", "MRK",
-        "BMY", "GILD", "AMGN", "BIIB", "REGN",
+        "JNJ",
+        "UNH",
+        "PFE",
+        "ABT",
+        "TMO",
+        "ABBV",
+        "LLY",
+        "MRK",
+        "BMY",
+        "GILD",
+        "AMGN",
+        "BIIB",
+        "REGN",
     ],
     "energy": [
-        "XOM", "CVX", "COP", "SLB", "EOG", "MPC", "VLO", "PSX",
+        "XOM",
+        "CVX",
+        "COP",
+        "SLB",
+        "EOG",
+        "MPC",
+        "VLO",
+        "PSX",
     ],
     "consumer": [
-        "WMT", "TGT", "HD", "LOW", "NKE", "SBUX", "MCD", "YUM",
+        "WMT",
+        "TGT",
+        "HD",
+        "LOW",
+        "NKE",
+        "SBUX",
+        "MCD",
+        "YUM",
     ],
 }
 
@@ -38,6 +94,7 @@ RETRY_DELAY_BASE = 1.0  # seconds
 
 class RateLimitError(Exception):
     """Raised when Finnhub rate limit is exceeded."""
+
     pass
 
 
@@ -77,15 +134,21 @@ class FinnhubClient:
                 if "429" in str(e) or "rate limit" in str(e).lower():
                     last_error = e
                     if attempt < MAX_RETRIES:
-                        delay = RETRY_DELAY_BASE * (2 ** attempt)
-                        print(f"Rate limited, retrying in {delay}s (attempt {attempt + 1}/{MAX_RETRIES})")
+                        delay = RETRY_DELAY_BASE * (2**attempt)
+                        print(
+                            f"Rate limited, retrying in {delay}s (attempt {attempt + 1}/{MAX_RETRIES})"
+                        )
                         time.sleep(delay)
                         continue
-                    raise RateLimitError("Finnhub rate limit exceeded. Please try again later.") from e
+                    raise RateLimitError(
+                        "Finnhub rate limit exceeded. Please try again later."
+                    ) from e
                 raise
             except Exception as e:
                 # For connection errors, retry once
-                if attempt < MAX_RETRIES and ("connection" in str(e).lower() or "timeout" in str(e).lower()):
+                if attempt < MAX_RETRIES and (
+                    "connection" in str(e).lower() or "timeout" in str(e).lower()
+                ):
                     delay = RETRY_DELAY_BASE
                     print(f"Connection error, retrying in {delay}s...")
                     time.sleep(delay)
@@ -209,17 +272,17 @@ class FinnhubClient:
         valid_quotes = []
         for symbol, quote in quotes.items():
             if quote is not None and quote.change_percent is not None:
-                valid_quotes.append({
-                    "symbol": symbol,
-                    "quote": quote,
-                    "change_percent": quote.change_percent,
-                })
+                valid_quotes.append(
+                    {
+                        "symbol": symbol,
+                        "quote": quote,
+                        "change_percent": quote.change_percent,
+                    }
+                )
 
         # Sort by change_percent
         reverse = direction == "gainers"
-        sorted_quotes = sorted(
-            valid_quotes, key=lambda x: x["change_percent"], reverse=reverse
-        )
+        sorted_quotes = sorted(valid_quotes, key=lambda x: x["change_percent"], reverse=reverse)
 
         # Format and return top N
         return [

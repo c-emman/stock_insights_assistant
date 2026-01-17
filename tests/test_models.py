@@ -50,8 +50,6 @@ def test_query_request():
 
 def test_query_response():
     """Test QueryResponse model."""
-    response = QueryResponse(
-        response="Apple is doing well", symbols=["AAPL"]
-    )
+    response = QueryResponse(response="Apple is doing well", symbols=["AAPL"])
     assert response.response == "Apple is doing well"
     assert response.symbols == ["AAPL"]

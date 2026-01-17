@@ -108,9 +108,7 @@ class QueryRequest(BaseModel):
 
     query: str
 
-    model_config = ConfigDict(
-        json_schema_extra={"example": {"query": "How is AAPL doing today?"}}
-    )
+    model_config = ConfigDict(json_schema_extra={"example": {"query": "How is AAPL doing today?"}})
 
 
 class QueryResponse(BaseModel):

@@ -49,9 +49,17 @@ class Orchestrator:
         # Handle both Pydantic model and dict responses
         if hasattr(parsed, "intent"):
             intent = parsed.intent.value if hasattr(parsed.intent, "value") else str(parsed.intent)
-            industry = parsed.industry.value if parsed.industry and hasattr(parsed.industry, "value") else parsed.industry
+            industry = (
+                parsed.industry.value
+                if parsed.industry and hasattr(parsed.industry, "value")
+                else parsed.industry
+            )
             symbols = parsed.symbols or []
-            direction = parsed.direction.value if parsed.direction and hasattr(parsed.direction, "value") else parsed.direction
+            direction = (
+                parsed.direction.value
+                if parsed.direction and hasattr(parsed.direction, "value")
+                else parsed.direction
+            )
         else:
             intent = parsed.get("intent", "unsupported")
             industry = parsed.get("industry")
@@ -85,17 +93,13 @@ class Orchestrator:
 
         else:
             # Unsupported query
-            unsupported_response = self.openai_client.format_response(
-                intent="unsupported", data={}
-            )
+            unsupported_response = self.openai_client.format_response(intent="unsupported", data={})
             return QueryResponse(
                 response=unsupported_response,
                 symbols=[],
             )
 
-    def _handle_top_gainers(
-        self, industry: str | None, direction: str | None
-    ) -> QueryResponse:
+    def _handle_top_gainers(self, industry: str | None, direction: str | None) -> QueryResponse:
         """Handle top gainers query."""
         if not industry:
             industry = "technology"  # Default to tech
@@ -121,9 +125,7 @@ class Orchestrator:
             top_gainers=movers,
         )
 
-    def _handle_top_losers(
-        self, industry: str | None, direction: str | None
-    ) -> QueryResponse:
+    def _handle_top_losers(self, industry: str | None, direction: str | None) -> QueryResponse:
         """Handle top losers query."""
         if not industry:
             industry = "technology"  # Default to tech
@@ -179,9 +181,7 @@ class Orchestrator:
                 "exchange": profile.exchange,
             }
 
-        response_text = self.openai_client.format_response(
-            intent="quote", data=data
-        )
+        response_text = self.openai_client.format_response(intent="quote", data=data)
 
         return QueryResponse(response=response_text, symbols=[symbol])
 
@@ -211,8 +211,6 @@ class Orchestrator:
                     comparison_data[symbol]["name"] = p.name
                     comparison_data[symbol]["market_cap"] = p.market_capitalization
 
-        response_text = self.openai_client.format_response(
-            intent="compare", data=comparison_data
-        )
+        response_text = self.openai_client.format_response(intent="compare", data=comparison_data)
 
         return QueryResponse(response=response_text, symbols=symbols)
