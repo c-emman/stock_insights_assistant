@@ -3,8 +3,9 @@ Tests for Finnhub client.
 """
 
 import pytest
-from app.services.finnhub import FinnhubClient, INDUSTRY_SYMBOLS
-from app.core.models import StockQuote, CompanyProfile
+
+from app.core.models import CompanyProfile, StockQuote
+from app.services.finnhub import FinnhubClient
 
 
 @pytest.fixture

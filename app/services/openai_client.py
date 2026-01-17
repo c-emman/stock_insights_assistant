@@ -3,10 +3,10 @@ OpenAI API client.
 """
 
 import json
-from typing import Optional
+
 from openai import OpenAI
 
-from app.core.models import Industry, Intent, Direction, ParsedQuery
+from app.core.models import Intent, ParsedQuery
 
 
 class OpenAIClient:
@@ -92,7 +92,7 @@ class OpenAIClient:
         self,
         intent: str,
         data: dict,
-        industry: Optional[str] = None,
+        industry: str | None = None,
     ) -> str:
         """Format response using AI based on intent and data.
 
@@ -120,7 +120,7 @@ class OpenAIClient:
             return self._format_unsupported_response()
 
     def _format_movers_response(
-        self, movers: list, industry: Optional[str], intent: str
+        self, movers: list, industry: str | None, intent: str
     ) -> str:
         """Format top gainers/losers response."""
         direction = "gainers" if intent == "top_gainers" else "losers"
@@ -207,7 +207,7 @@ class OpenAIClient:
         )
 
     def _fallback_format_movers(
-        self, movers: list, industry: Optional[str], direction: str
+        self, movers: list, industry: str | None, direction: str
     ) -> str:
         """Fallback formatting for movers if AI fails."""
         industry_text = f" in {industry}" if industry else ""

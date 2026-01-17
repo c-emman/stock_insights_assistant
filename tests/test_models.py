@@ -2,12 +2,11 @@
 Tests for core data models.
 """
 
-import pytest
 from app.core.models import (
-    StockQuote,
     CompanyProfile,
     QueryRequest,
     QueryResponse,
+    StockQuote,
 )
 
 

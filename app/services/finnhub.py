@@ -3,9 +3,10 @@ Finnhub API client.
 """
 
 import time
+
 import finnhub
-from typing import Optional
-from app.core.models import StockQuote, CompanyProfile
+
+from app.core.models import CompanyProfile, StockQuote
 
 # Curated industry symbol lists
 INDUSTRY_SYMBOLS = {
@@ -93,7 +94,7 @@ class FinnhubClient:
 
         raise last_error or Exception("Max retries exceeded")
 
-    def get_quote(self, symbol: str) -> Optional[StockQuote]:
+    def get_quote(self, symbol: str) -> StockQuote | None:
         """Get real-time quote for a stock symbol.
 
         Args:
@@ -125,7 +126,7 @@ class FinnhubClient:
             print(f"Error fetching quote for {symbol}: {e}")
             return None
 
-    def get_company_profile(self, symbol: str) -> Optional[CompanyProfile]:
+    def get_company_profile(self, symbol: str) -> CompanyProfile | None:
         """Get company profile information.
 
         Args:
@@ -162,7 +163,7 @@ class FinnhubClient:
             print(f"Error fetching profile for {symbol}: {e}")
             return None
 
-    def get_quote_multiple(self, symbols: list[str]) -> dict[str, Optional[StockQuote]]:
+    def get_quote_multiple(self, symbols: list[str]) -> dict[str, StockQuote | None]:
         """Get quotes for multiple symbols.
 
         Args:

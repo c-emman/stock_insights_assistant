@@ -3,10 +3,10 @@ Orchestrator for coordinating services.
 """
 
 import os
-from typing import Optional
+
+from app.core.models import QueryResponse
 from app.services.finnhub import FinnhubClient
 from app.services.openai_client import OpenAIClient
-from app.core.models import QueryResponse
 
 
 class Orchestrator:
@@ -14,8 +14,8 @@ class Orchestrator:
 
     def __init__(
         self,
-        finnhub_api_key: Optional[str] = None,
-        openai_api_key: Optional[str] = None,
+        finnhub_api_key: str | None = None,
+        openai_api_key: str | None = None,
     ):
         """Initialize orchestrator.
 
@@ -94,7 +94,7 @@ class Orchestrator:
             )
 
     def _handle_top_gainers(
-        self, industry: Optional[str], direction: Optional[str]
+        self, industry: str | None, direction: str | None
     ) -> QueryResponse:
         """Handle top gainers query."""
         if not industry:
@@ -122,7 +122,7 @@ class Orchestrator:
         )
 
     def _handle_top_losers(
-        self, industry: Optional[str], direction: Optional[str]
+        self, industry: str | None, direction: str | None
     ) -> QueryResponse:
         """Handle top losers query."""
         if not industry:

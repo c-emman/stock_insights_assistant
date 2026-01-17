@@ -2,8 +2,7 @@
 Tests for formatters.
 """
 
-import pytest
-from app.utils.formatters import format_stock_data, format_insight
+from app.utils.formatters import format_insight, format_stock_data
 
 
 def test_format_stock_data():

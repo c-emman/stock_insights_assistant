@@ -3,7 +3,7 @@ Core data models.
 """
 
 from enum import Enum
-from typing import Optional
+
 from pydantic import BaseModel, ConfigDict
 
 
@@ -39,9 +39,9 @@ class ParsedQuery(BaseModel):
     """Parsed user query from AI."""
 
     intent: Intent
-    industry: Optional[Industry] = None
+    industry: Industry | None = None
     symbols: list[str] = []
-    direction: Optional[Direction] = None
+    direction: Direction | None = None
 
 
 class StockQuote(BaseModel):
@@ -55,7 +55,7 @@ class StockQuote(BaseModel):
     low: float
     open_price: float
     previous_close: float
-    timestamp: Optional[int] = None
+    timestamp: int | None = None
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -78,16 +78,16 @@ class CompanyProfile(BaseModel):
 
     symbol: str
     name: str
-    country: Optional[str] = None
-    currency: Optional[str] = None
-    exchange: Optional[str] = None
-    ipo: Optional[str] = None
-    market_capitalization: Optional[float] = None
-    share_outstanding: Optional[float] = None
-    logo: Optional[str] = None
-    phone: Optional[str] = None
-    weburl: Optional[str] = None
-    finnhub_industry: Optional[str] = None
+    country: str | None = None
+    currency: str | None = None
+    exchange: str | None = None
+    ipo: str | None = None
+    market_capitalization: float | None = None
+    share_outstanding: float | None = None
+    logo: str | None = None
+    phone: str | None = None
+    weburl: str | None = None
+    finnhub_industry: str | None = None
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -118,7 +118,7 @@ class QueryResponse(BaseModel):
 
     response: str
     symbols: list[str] = []
-    top_gainers: Optional[list[dict]] = None
+    top_gainers: list[dict] | None = None
 
     model_config = ConfigDict(
         json_schema_extra={

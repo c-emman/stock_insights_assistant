@@ -2,10 +2,12 @@
 Tests for orchestrator.
 """
 
+from unittest.mock import patch
+
 import pytest
-from unittest.mock import Mock, patch
+
+from app.core.models import CompanyProfile, QueryResponse, StockQuote
 from app.core.orchestrator import Orchestrator
-from app.core.models import QueryResponse, StockQuote, CompanyProfile
 
 
 @pytest.fixture

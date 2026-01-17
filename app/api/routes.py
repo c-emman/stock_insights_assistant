@@ -49,13 +49,13 @@ async def process_query(request: Request, query: QueryRequest):
         response = orchestrator.process_query(query.query.strip())
         return response
 
-    except RateLimitError as e:
+    except RateLimitError:
         raise HTTPException(
             status_code=429,
             detail="Rate limit exceeded. Please wait a moment and try again."
         )
 
-    except ValidationError as e:
+    except ValidationError:
         raise HTTPException(
             status_code=400,
             detail="Invalid query format"
