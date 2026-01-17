@@ -81,7 +81,7 @@ class FinnhubClient:
                         print(f"Rate limited, retrying in {delay}s (attempt {attempt + 1}/{MAX_RETRIES})")
                         time.sleep(delay)
                         continue
-                    raise RateLimitError("Finnhub rate limit exceeded. Please try again later.")
+                    raise RateLimitError("Finnhub rate limit exceeded. Please try again later.") from e
                 raise
             except Exception as e:
                 # For connection errors, retry once

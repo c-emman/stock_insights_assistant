@@ -53,13 +53,13 @@ async def process_query(request: Request, query: QueryRequest):
         raise HTTPException(
             status_code=429,
             detail="Rate limit exceeded. Please wait a moment and try again."
-        )
+        ) from None
 
     except ValidationError:
         raise HTTPException(
             status_code=400,
             detail="Invalid query format"
-        )
+        ) from None
 
     except Exception as e:
         # Log the error for debugging
@@ -67,4 +67,4 @@ async def process_query(request: Request, query: QueryRequest):
         raise HTTPException(
             status_code=500,
             detail="An error occurred while processing your query. Please try again."
-        )
+        ) from None
