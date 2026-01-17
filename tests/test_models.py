@@ -3,7 +3,12 @@ Tests for core data models.
 """
 
 import pytest
-from app.core.models import StockQuote, CompanyProfile, QueryRequest, QueryResponse
+from app.core.models import (
+    StockQuote,
+    CompanyProfile,
+    QueryRequest,
+    QueryResponse,
+)
 
 
 def test_stock_quote_creation():

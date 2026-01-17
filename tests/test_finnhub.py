@@ -3,7 +3,7 @@ Tests for Finnhub client.
 """
 
 import pytest
-from app.services.finnhub import FinnhubClient
+from app.services.finnhub import FinnhubClient, INDUSTRY_SYMBOLS
 from app.core.models import StockQuote, CompanyProfile
 
 
@@ -148,3 +148,51 @@ def test_get_quote_multiple(mock_finnhub_client):
     assert "TSLA" in results
     assert isinstance(results["AAPL"], StockQuote)
     assert isinstance(results["TSLA"], StockQuote)
+
+
+def test_get_top_movers_by_industry_gainers(mock_finnhub_client):
+    """Test getting top gainers by industry."""
+    client, mock_client = mock_finnhub_client
+
+    # Mock quotes for tech stocks
+    def mock_quote(symbol):
+        quotes = {
+            "AAPL": {"c": 182.52, "d": 5.0, "dp": 2.8, "h": 183.0, "l": 180.0, "o": 180.0, "pc": 177.52},
+            "MSFT": {"c": 380.0, "d": 3.0, "dp": 0.8, "h": 381.0, "l": 378.0, "o": 378.0, "pc": 377.0},
+            "GOOGL": {"c": 140.0, "d": 4.0, "dp": 2.9, "h": 141.0, "l": 139.0, "o": 139.0, "pc": 136.0},
+        }
+        return quotes.get(symbol, {})
+
+    mock_client.quote.side_effect = mock_quote
+
+    gainers = client.get_top_movers_by_industry("technology", direction="gainers", limit=2)
+    assert len(gainers) == 2
+    # Should be sorted by change_percent descending
+    assert gainers[0]["change_percent"] >= gainers[1]["change_percent"]
+    assert gainers[0]["symbol"] in ["AAPL", "GOOGL", "MSFT"]
+
+
+def test_get_top_movers_by_industry_losers(mock_finnhub_client):
+    """Test getting top losers by industry."""
+    client, mock_client = mock_finnhub_client
+
+    def mock_quote(symbol):
+        quotes = {
+            "AAPL": {"c": 175.0, "d": -2.0, "dp": -1.1, "h": 177.0, "l": 174.0, "o": 177.0, "pc": 177.0},
+            "MSFT": {"c": 375.0, "d": -5.0, "dp": -1.3, "h": 380.0, "l": 374.0, "o": 380.0, "pc": 380.0},
+        }
+        return quotes.get(symbol, {})
+
+    mock_client.quote.side_effect = mock_quote
+
+    losers = client.get_top_movers_by_industry("technology", direction="losers", limit=2)
+    assert len(losers) == 2
+    # Should be sorted by change_percent ascending (most negative first)
+    assert losers[0]["change_percent"] <= losers[1]["change_percent"]
+
+
+def test_get_top_movers_invalid_industry(mock_finnhub_client):
+    """Test getting movers for invalid industry."""
+    client, _ = mock_finnhub_client
+    movers = client.get_top_movers_by_industry("invalid_industry")
+    assert movers == []
