@@ -3,9 +3,445 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Insights Assistant</title>
+    <title>Stock Insights | Balderton Capital</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #000;
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 48px 24px;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 64px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #1a1a1a;
+        }
+
+        .logo {
+            height: 28px;
+            filter: invert(1);
+        }
+
+        .header-tag {
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #ff6b00;
+            padding: 6px 12px;
+            border: 1px solid #ff6b00;
+            border-radius: 4px;
+        }
+
+        /* Hero */
+        .hero {
+            margin-bottom: 48px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.1;
+            margin-bottom: 16px;
+            letter-spacing: -0.03em;
+        }
+
+        h1 .accent {
+            color: #ff6b00;
+        }
+
+        .subtitle {
+            font-size: 1.125rem;
+            color: #666;
+            line-height: 1.6;
+            max-width: 520px;
+        }
+
+        /* Query Section */
+        .query-section {
+            margin-bottom: 32px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 20px 140px 20px 24px;
+            font-family: inherit;
+            font-size: 1rem;
+            border: 1px solid #222;
+            border-radius: 8px;
+            background: #0a0a0a;
+            color: #fff;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: #ff6b00;
+            box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.1);
+        }
+
+        input[type="text"]::placeholder {
+            color: #444;
+        }
+
+        .input-actions {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        button {
+            padding: 12px 24px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            background: #ff6b00;
+            color: #000;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        button:hover {
+            background: #ff8533;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button:disabled {
+            background: #4d2800;
+            color: #804400;
+            cursor: not-allowed;
+        }
+
+        /* Examples */
+        .examples {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .examples-label {
+            font-size: 0.8rem;
+            color: #444;
+            margin-right: 4px;
+        }
+
+        .example-chip {
+            padding: 8px 14px;
+            font-size: 0.85rem;
+            background: transparent;
+            border: 1px solid #222;
+            border-radius: 6px;
+            color: #888;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .example-chip:hover {
+            border-color: #ff6b00;
+            color: #ff6b00;
+        }
+
+        /* Response Section */
+        .response-section {
+            background: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .response-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 20px;
+            border-bottom: 1px solid #1a1a1a;
+        }
+
+        .response-dot {
+            width: 8px;
+            height: 8px;
+            background: #ff6b00;
+            border-radius: 50%;
+        }
+
+        .response-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .response-body {
+            padding: 24px;
+            min-height: 100px;
+        }
+
+        .response-content {
+            font-size: 1rem;
+            line-height: 1.8;
+            color: #ccc;
+            white-space: pre-wrap;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #666;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #222;
+            border-top-color: #ff6b00;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .symbols {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .symbols-label {
+            font-size: 0.7rem;
+            color: #444;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .symbol-tag {
+            padding: 4px 10px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: rgba(255, 107, 0, 0.1);
+            border: 1px solid rgba(255, 107, 0, 0.3);
+            border-radius: 4px;
+            color: #ff6b00;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+        }
+
+        .error {
+            color: #ff4444;
+            background: rgba(255, 68, 68, 0.1);
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 68, 68, 0.2);
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 64px;
+            padding-top: 24px;
+            border-top: 1px solid #1a1a1a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-text {
+            font-size: 0.75rem;
+            color: #333;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 16px;
+        }
+
+        .footer-links span {
+            font-size: 0.75rem;
+            color: #444;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .container {
+                padding: 32px 16px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            input[type="text"] {
+                padding-right: 24px;
+            }
+
+            .input-actions {
+                position: static;
+                transform: none;
+                margin-top: 12px;
+            }
+
+            .input-wrapper {
+                display: flex;
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Stock Insights Assistant</h1>
+    <div class="container">
+        <header>
+            <img src="/static/balderton_capital_logo.svg" alt="Balderton Capital" class="logo">
+            <span class="header-tag">Stock Insights</span>
+        </header>
+
+        <div class="hero">
+            <h1>Real-time stock<br>insights<span class="accent">.</span></h1>
+            <p class="subtitle">
+                Query stock prices, compare companies, and discover top market movers using natural language.
+            </p>
+        </div>
+
+        <div class="query-section">
+            <div class="input-wrapper">
+                <input 
+                    type="text" 
+                    id="queryInput" 
+                    placeholder="Ask about any stock..."
+                    autofocus
+                >
+                <div class="input-actions">
+                    <button id="submitBtn" onclick="submitQuery()">Search</button>
+                </div>
+            </div>
+
+            <div class="examples">
+                <span class="examples-label">Try:</span>
+                <span class="example-chip" onclick="setExample('How is Apple doing?')">How is Apple doing?</span>
+                <span class="example-chip" onclick="setExample('Compare Tesla and Microsoft')">Compare TSLA vs MSFT</span>
+                <span class="example-chip" onclick="setExample('Top gainers in tech')">Top tech gainers</span>
+            </div>
+        </div>
+
+        <div class="response-section" id="responseSection" style="display: none;">
+            <div class="response-header">
+                <div class="response-dot"></div>
+                <span class="response-label">Response</span>
+            </div>
+            <div class="response-body">
+                <div class="response-content" id="responseContent"></div>
+                <div class="symbols" id="symbolTags" style="display: none;"></div>
+            </div>
+        </div>
+
+        <footer>
+            <span class="footer-text">Powered by Finnhub & OpenAI</span>
+            <div class="footer-links">
+                <span>Internal Tool</span>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const queryInput = document.getElementById('queryInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const responseSection = document.getElementById('responseSection');
+        const responseContent = document.getElementById('responseContent');
+        const symbolTags = document.getElementById('symbolTags');
+
+        queryInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') submitQuery();
+        });
+
+        function setExample(text) {
+            queryInput.value = text;
+            queryInput.focus();
+        }
+
+        async function submitQuery() {
+            const query = queryInput.value.trim();
+            if (!query) return;
+
+            responseSection.style.display = 'block';
+            submitBtn.disabled = true;
+            responseContent.innerHTML = '<div class="loading"><div class="spinner"></div>Analyzing...</div>';
+            symbolTags.style.display = 'none';
+            symbolTags.innerHTML = '';
+
+            try {
+                const response = await fetch('/api/query', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Request failed');
+                }
+
+                const data = await response.json();
+                responseContent.textContent = data.response;
+
+                if (data.symbols && data.symbols.length > 0) {
+                    symbolTags.style.display = 'flex';
+                    symbolTags.innerHTML = '<span class="symbols-label">Symbols</span>' + 
+                        data.symbols.map(s => `<span class="symbol-tag">${s}</span>`).join('');
+                }
+
+            } catch (error) {
+                responseContent.innerHTML = `<div class="error">${error.message}</div>`;
+            } finally {
+                submitBtn.disabled = false;
+            }
+        }
+    </script>
 </body>
 </html>
