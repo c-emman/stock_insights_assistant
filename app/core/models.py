@@ -2,8 +2,46 @@
 Core data models.
 """
 
-from pydantic import BaseModel, ConfigDict
+from enum import Enum
 from typing import Optional
+from pydantic import BaseModel, ConfigDict
+
+
+# Query parsing enums
+class Industry(str, Enum):
+    """Supported industries for stock queries."""
+
+    TECHNOLOGY = "technology"
+    FINANCE = "finance"
+    HEALTHCARE = "healthcare"
+    ENERGY = "energy"
+    CONSUMER = "consumer"
+
+
+class Intent(str, Enum):
+    """Supported query intents."""
+
+    TOP_GAINERS = "top_gainers"
+    TOP_LOSERS = "top_losers"
+    QUOTE = "quote"
+    COMPARE = "compare"
+    UNSUPPORTED = "unsupported"
+
+
+class Direction(str, Enum):
+    """Direction for top movers."""
+
+    GAINERS = "gainers"
+    LOSERS = "losers"
+
+
+class ParsedQuery(BaseModel):
+    """Parsed user query from AI."""
+
+    intent: Intent
+    industry: Optional[Industry] = None
+    symbols: list[str] = []
+    direction: Optional[Direction] = None
 
 
 class StockQuote(BaseModel):
@@ -80,6 +118,7 @@ class QueryResponse(BaseModel):
 
     response: str
     symbols: list[str] = []
+    top_gainers: Optional[list[dict]] = None
 
     model_config = ConfigDict(
         json_schema_extra={
