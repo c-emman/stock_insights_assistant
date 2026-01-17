@@ -2,6 +2,7 @@
 Finnhub API client.
 """
 
+import time
 import finnhub
 from typing import Optional
 from app.core.models import StockQuote, CompanyProfile
@@ -9,85 +10,38 @@ from app.core.models import StockQuote, CompanyProfile
 # Curated industry symbol lists
 INDUSTRY_SYMBOLS = {
     "technology": [
-        "AAPL",
-        "MSFT",
-        "GOOGL",
-        "GOOG",
-        "AMZN",
-        "META",
-        "NVDA",
-        "TSLA",
-        "NFLX",
-        "CRM",
-        "ORCL",
-        "ADBE",
-        "INTC",
-        "AMD",
-        "CSCO",
-        "IBM",
-        "NOW",
-        "SNOW",
-        "PLTR",
-        "ZM",
-        "UBER",
-        "LYFT",
+        "AAPL", "MSFT", "GOOGL", "GOOG", "AMZN", "META", "NVDA", "TSLA",
+        "NFLX", "CRM", "ORCL", "ADBE", "INTC", "AMD", "CSCO", "IBM",
+        "NOW", "SNOW", "PLTR", "ZM", "UBER", "LYFT",
     ],
     "finance": [
-        "JPM",
-        "BAC",
-        "WFC",
-        "C",
-        "GS",
-        "MS",
-        "BLK",
-        "SCHW",
-        "AXP",
-        "COF",
-        "PYPL",
-        "SQ",
-        "V",
-        "MA",
+        "JPM", "BAC", "WFC", "C", "GS", "MS", "BLK", "SCHW",
+        "AXP", "COF", "PYPL", "SQ", "V", "MA",
     ],
     "healthcare": [
-        "JNJ",
-        "UNH",
-        "PFE",
-        "ABT",
-        "TMO",
-        "ABBV",
-        "LLY",
-        "MRK",
-        "BMY",
-        "GILD",
-        "AMGN",
-        "BIIB",
-        "REGN",
+        "JNJ", "UNH", "PFE", "ABT", "TMO", "ABBV", "LLY", "MRK",
+        "BMY", "GILD", "AMGN", "BIIB", "REGN",
     ],
     "energy": [
-        "XOM",
-        "CVX",
-        "COP",
-        "SLB",
-        "EOG",
-        "MPC",
-        "VLO",
-        "PSX",
+        "XOM", "CVX", "COP", "SLB", "EOG", "MPC", "VLO", "PSX",
     ],
     "consumer": [
-        "WMT",
-        "TGT",
-        "HD",
-        "LOW",
-        "NKE",
-        "SBUX",
-        "MCD",
-        "YUM",
+        "WMT", "TGT", "HD", "LOW", "NKE", "SBUX", "MCD", "YUM",
     ],
 }
 
+# Rate limiting constants
+MAX_RETRIES = 2
+RETRY_DELAY_BASE = 1.0  # seconds
+
+
+class RateLimitError(Exception):
+    """Raised when Finnhub rate limit is exceeded."""
+    pass
+
 
 class FinnhubClient:
-    """Client for interacting with Finnhub API using the official SDK."""
+    """Client for interacting with Finnhub API using the official SDK with rate limiting support."""
 
     def __init__(self, api_key: str):
         """Initialize Finnhub client.
@@ -96,7 +50,48 @@ class FinnhubClient:
             api_key: Finnhub API key
         """
         self.api_key = api_key
-        self.client = finnhub.Client(api_key=api_key)
+        self._client = finnhub.Client(api_key=api_key)
+
+    def _call_with_retry(self, func, *args, **kwargs):
+        """Execute API call with retry logic for rate limits.
+
+        Args:
+            func: The API function to call
+            *args, **kwargs: Arguments to pass to the function
+
+        Returns:
+            API response
+
+        Raises:
+            RateLimitError: If rate limit exceeded after retries
+            Exception: For other errors
+        """
+        last_error = None
+
+        for attempt in range(MAX_RETRIES + 1):
+            try:
+                return func(*args, **kwargs)
+            except finnhub.FinnhubAPIException as e:
+                # Check for rate limit (429)
+                if "429" in str(e) or "rate limit" in str(e).lower():
+                    last_error = e
+                    if attempt < MAX_RETRIES:
+                        delay = RETRY_DELAY_BASE * (2 ** attempt)
+                        print(f"Rate limited, retrying in {delay}s (attempt {attempt + 1}/{MAX_RETRIES})")
+                        time.sleep(delay)
+                        continue
+                    raise RateLimitError("Finnhub rate limit exceeded. Please try again later.")
+                raise
+            except Exception as e:
+                # For connection errors, retry once
+                if attempt < MAX_RETRIES and ("connection" in str(e).lower() or "timeout" in str(e).lower()):
+                    delay = RETRY_DELAY_BASE
+                    print(f"Connection error, retrying in {delay}s...")
+                    time.sleep(delay)
+                    continue
+                raise
+
+        raise last_error or Exception("Max retries exceeded")
 
     def get_quote(self, symbol: str) -> Optional[StockQuote]:
         """Get real-time quote for a stock symbol.
@@ -105,11 +100,12 @@ class FinnhubClient:
             symbol: Stock symbol (e.g., 'AAPL', 'TSLA')
 
         Returns:
-            StockQuote object or None if error
+            StockQuote object or None if not found/error
         """
         try:
-            quote_data = self.client.quote(symbol)
-            if not quote_data or quote_data.get("c") is None:
+            quote_data = self._call_with_retry(self._client.quote, symbol.upper())
+
+            if not quote_data or quote_data.get("c") is None or quote_data.get("c") == 0:
                 return None
 
             return StockQuote(
@@ -123,6 +119,8 @@ class FinnhubClient:
                 previous_close=quote_data.get("pc", 0.0),
                 timestamp=quote_data.get("t"),
             )
+        except RateLimitError:
+            raise
         except Exception as e:
             print(f"Error fetching quote for {symbol}: {e}")
             return None
@@ -134,11 +132,14 @@ class FinnhubClient:
             symbol: Stock symbol (e.g., 'AAPL', 'TSLA')
 
         Returns:
-            CompanyProfile object or None if error
+            CompanyProfile object or None if not found/error
         """
         try:
-            profile_data = self.client.company_profile2(symbol=symbol)
-            if not profile_data:
+            profile_data = self._call_with_retry(
+                self._client.company_profile2, symbol=symbol.upper()
+            )
+
+            if not profile_data or not profile_data.get("name"):
                 return None
 
             return CompanyProfile(
@@ -155,6 +156,8 @@ class FinnhubClient:
                 weburl=profile_data.get("weburl"),
                 finnhub_industry=profile_data.get("finnhubIndustry"),
             )
+        except RateLimitError:
+            raise
         except Exception as e:
             print(f"Error fetching profile for {symbol}: {e}")
             return None
@@ -170,7 +173,12 @@ class FinnhubClient:
         """
         results = {}
         for symbol in symbols:
-            results[symbol.upper()] = self.get_quote(symbol)
+            try:
+                results[symbol.upper()] = self.get_quote(symbol)
+            except RateLimitError:
+                # If rate limited, return what we have so far
+                print(f"Rate limited while fetching {symbol}, returning partial results")
+                break
         return results
 
     def get_top_movers_by_industry(
@@ -187,9 +195,8 @@ class FinnhubClient:
             limit: Number to return
 
         Returns:
-            List of dicts with symbol, quote data, sorted by change_percent
+            List of dicts with symbol and quote data, sorted by change_percent
         """
-        # Get symbols for industry
         symbols = INDUSTRY_SYMBOLS.get(industry.lower(), [])
         if not symbols:
             return []
@@ -197,20 +204,18 @@ class FinnhubClient:
         # Get quotes for all symbols
         quotes = self.get_quote_multiple(symbols)
 
-        # Filter valid quotes and create list
+        # Filter valid quotes
         valid_quotes = []
         for symbol, quote in quotes.items():
             if quote is not None and quote.change_percent is not None:
-                valid_quotes.append(
-                    {
-                        "symbol": symbol,
-                        "quote": quote,
-                        "change_percent": quote.change_percent,
-                    }
-                )
+                valid_quotes.append({
+                    "symbol": symbol,
+                    "quote": quote,
+                    "change_percent": quote.change_percent,
+                })
 
         # Sort by change_percent
-        reverse = direction == "gainers"  # True for gainers (desc), False for losers (asc)
+        reverse = direction == "gainers"
         sorted_quotes = sorted(
             valid_quotes, key=lambda x: x["change_percent"], reverse=reverse
         )
