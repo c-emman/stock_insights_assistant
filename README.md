@@ -148,6 +148,16 @@ Focused on reliable quote/compare/movers features instead.
 
 **Why**: Simple but effective. For internal tooling, this handles transient rate limits without over-engineering (no request queuing, no persistent rate tracking).
 
+### 6. Default Industry Assumption
+**Decision**: When no industry is specified for top gainers/losers queries, default to "technology".
+
+**Why**: Technology stocks tend to have the highest volatility and are most commonly queried for top movers. This provides a sensible default rather than returning an error or asking for clarification. Users can always specify another industry explicitly.
+
+### 7. Model Selection Strategy
+**Decision**: Use `gpt-4.1` for query parsing and `gpt-4.1-mini` for response formatting.
+
+**Why**: Query parsing requires higher accuracy for intent/symbol extraction—mistakes here break the entire flow. Response formatting is more forgiving (just presenting data nicely), so the faster/cheaper mini model is sufficient. This balances accuracy where it matters most while optimizing cost and latency.
+
 ## What I'd Improve With More Time
 
 1. **Caching** - Add Redis/memory cache for quotes (TTL ~60s) to reduce API calls
